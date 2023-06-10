@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Sludge Tracker</title>
+</head>
+
+<body>
+
+    <h1>Sludge Tracker</h1>
+    <br><br><br><br><br>
+    <div style="display: block; margin-left: auto; margin-right: auto; width: 60%;">
+        <div class="stats">
+            <div><small>Amount of sludge</small><br>
+                <p class="low-top-margin" id="one">N/A</p>
+            </div>
+            <div><small>Coins if sold to bz</small><br>
+                <p class="low-top-margin" id="two">N/A</p>
+            </div>
+            <div><small>Percentage to goal</small><br>
+                <p class="low-top-margin" id="three">N/A</p>
+            </div>
+        </div>
+    </div>
+    <input type="number" id="goal" placeholder="Bazaar sell goal (thousands)" />
+
+
+
+
+
+
+
+
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+        }
+
+
+        .low-top-margin {
+            margin-top: 4px;
+        }
+    </style>
+
+
+
+    <script url="script.js">
+
+        let sellPrice = null
+
+        function getAmountOfItem(data, item) {
+            console.log(data)
+            fetch("https://api.slothpixel.me/api/skyblock/bazaar/SLUDGE_JUICE")
+                .then(response => response.json())
+                .then(data => updateSell(data.quick_status.sellPrice))
+            count = 0;
+            for (let i = 0; i < data.length; i++) {
+                console.log("Reading: " + i);
+                try {
+                    if (data[i].tag.ExtraAttributes.id.includes(item)) {
+                        console.log("Index " + i + " is " + item)
+                        count += data[i].Count
+                    } else {
+                        console.log("Index " + i + " is NOT " + item)
+                    }
+                } catch (TypeError) {
+                    console.log("Index " + i + " is not occupied")
+                }
+            }
+            console.log("Total amount of items: " + count + "\nBazaar value: " + (count * sellPrice))
+            document.getElementById("one").innerText = count
+            document.getElementById("two").innerText = Math.round((count * sellPrice + Number.EPSILON))
+            document.getElementById("three").innerText = (Math.round(((count * sellPrice) / (document.getElementById("goal").value * 1000) * 100 + Number.EPSILON) * 100) / 100) + "%"
+        }
+
+        function updateSell(data) {
+            console.log(data)
+            sellPrice = data
+        }
+
+        function mainLoop() {
+            fetch("https://sky.shiiyu.moe/api/v2/profile/4fa1178c10734d5daa3c092f6feab279").then(response => response.json()).then(data => getAmountOfItem(data.profiles["dc27610e-9d94-4ab4-b0f2-140770a26e17"].items.inventory, "SLUDGE_JUICE"))
+            setTimeout(mainLoop, 5000)
+        }
+        mainLoop()
+    </script>
+
+</body>
+
+</html>
